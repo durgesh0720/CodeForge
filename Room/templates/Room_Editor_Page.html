@@ -338,7 +338,7 @@
       
       // Establish a WebSocket connection.
       // Note: We use the same socket for code updates, chat, and code execution responses.
-      const chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/${room_id}/`);
+      const chatSocket = new WebSocket(`wss://codeforge-ezfh.onrender.com/ws/chat/${room_id}/`);
 
       // Initialize the Ace Editor.
       editor = ace.edit("editor");

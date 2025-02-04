@@ -18,7 +18,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['codeforge-ezfh.onrender.com']
 
 CSRF_TRUSTED_ORIGINS=[
-    "https://22e1-2409-40d2-102c-a696-c66-a14d-fbd4-866b.ngrok-free.app",
+    "https://codeforge-ezfh.onrender.com",
 ]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
