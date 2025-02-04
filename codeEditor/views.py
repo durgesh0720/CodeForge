@@ -67,7 +67,7 @@ def save_code(request):
         description = request.POST.get('description')   
         file_obj = File.objects.get(id=file_id)
         file_obj.content = content
-        file_obj.extainson = file_obj.extainson
+        file_obj.extension = file_obj.extension
         file_obj.description = description
         file_obj.save()
     return redirect(f'/projecteditor/{file_id}/')
@@ -81,7 +81,7 @@ def update_file(request):
         extainson = request.POST.get('language')
 
         file_obj = File.objects.get(id=file_id)
-        file_obj.extainson = extainson
+        file_obj.extension = extainson
         file_obj.description = description
         file_obj.file_name = file_name
         file_obj.save()
@@ -98,7 +98,7 @@ def execute_code(request):
         file_obj = File.objects.get(id=file_id)
 
         file_obj.content=script
-        file_obj.extainson = language
+        file_obj.extension = language
         print(f'Execute: ',script)
         file_obj.save()
 
