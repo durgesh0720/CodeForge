@@ -35,7 +35,7 @@ def creating_project(request):
         project_obj = File.objects.create(
             user=request.user, 
             file_name=file_name,
-            extainson = language,
+            extension = language,
             description = description
         )
         project_obj.save()
