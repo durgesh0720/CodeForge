@@ -1,3 +1,9 @@
+import django
+import os
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "eCoading.settings")
+django.setup()  # ✅ Initialize Django before importing models
+
 import json
 import requests
 from channels.generic.websocket import AsyncWebsocketConsumer

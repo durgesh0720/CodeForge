@@ -15,11 +15,12 @@ SECRET_KEY = 'django-insecure-*(@zcmsqr3_$bx2%&fz06*wtbjarg(#arg8-f5!4a_hi56&o8*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['codeforge.onrender.com']
 
 CSRF_TRUSTED_ORIGINS=[
     "https://22e1-2409-40d2-102c-a696-c66-a14d-fbd4-866b.ngrok-free.app",
 ]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # Application definition
@@ -36,10 +37,12 @@ INSTALLED_APPS = [
     'accounts',
     'codeEditor',
     'Room',
+    "whitenoise.runserver_nostatic",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -115,6 +118,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
