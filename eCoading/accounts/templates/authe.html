@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <div class="bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-8">
+                <div class="group" x-data="{ isLogin: true, showPassword: false }">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-gray-100" x-text="isLogin ? 'Welcome Back' : 'Create Account'"></h2>
+                        <p class="text-gray-400 mt-2" x-text="isLogin ? 'Please login to your account' : 'Sign up for a new account'"></p>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form action="{% url 'loginpage' %}" method="post" x-show="isLogin" class="space-y-6">
+                        {% csrf_token %}
+                        <p style="color: rgb(208, 0, 0);">{{ error }}</p>
+                        <p style="color: gray; text-align: center;">{{ msg }}</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300">username</label>
+                            <input type="text" name="username" required class="mt-1 block w-full px-2 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                        </div>
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-300">Password</label>
+                            <input :type="showPassword ? 'text' : 'password'" name="password" required class="mt-1 block w-full px-2 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                        </div>
+                        <button type="submit" class="w-full py-3 px-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition focus:ring-4 focus:ring-indigo-300">Login</button>
+                        <p class="text-center text-sm text-gray-400">Don't have an account? <button @click="isLogin = false" class="text-indigo-400 hover:text-indigo-300 font-medium">Sign up</button></p>
+                    </form>
+
+                    <!-- Signup Form -->
+                    <form action="{% url 'signuppage' %}" method="post" x-show="!isLogin" class="space-y-6">
+                        {% csrf_token %}
+                        <p style="color: rgb(167, 3, 3); text-align: center;">{{ error }}</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300">Full Name</label>
+                            <input type="text" required name="fname" class="mt-1 block w-full px-2 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300">Username</label>
+                            <input type="text" required name="username" class="mt-1 block w-full px-2 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300">Email</label>
+                            <input type="email" required name="email" class="mt-1 block w-full px-2 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300">Password</label>
+                            <input type="password" required name="password" class="mt-1 block w-full px-2 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300">Confirm Password</label>
+                            <input type="password" required name="confirm_password" class="mt-1 block w-full px-2 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                        </div>
+                        <button type="submit" class="w-full py-3 px-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition focus:ring-4 focus:ring-indigo-300 block">Sign Up</button>
+                        <p class="text-center text-sm text-gray-400">Already have an account? <button @click="isLogin = true" class="text-indigo-400 hover:text-indigo-300 font-medium">Login</button></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

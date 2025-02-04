@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Collaborate, code, and innovate on our futuristic coding platform. Built for the developers of tomorrow.">
+    <title>CodeForge - Collaborative Coding Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7); /* Dimming effect */
+            backdrop-filter: blur(5px); /* Blurring the background */
+            display: none; /* Hidden by default */
+            z-index: 10; /* Behind the form but above the rest of the content */
+           
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1e1e2f, #2d2d44);
+            color: #ffffff;
+            line-height: 1.6;
+            padding-top: 80px; /* Adjust for the fixed header */
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            height: 100vh; /* Make sure the body is the full height */
+        }
+
+        .container {
+            width: 100%;
+            height: calc(100vh - 80px); /* Adjust height to account for the fixed header */
+            overflow-y: scroll; /* Only allow vertical scroll */
+            overflow-x: hidden; /* Disable horizontal scroll */
+            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;  /* Internet Explorer */
+        }
+
+        .container::-webkit-scrollbar {
+            display: none; /* Hide the scrollbar in webkit browsers (Chrome/Safari) */
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: url('coding-background.jpg') no-repeat center center/cover;
+            color: #ffffff;
+            padding: 2rem;
+            position: relative;
+            z-index: 0; /* Behind the overlay and contact form */
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1; /* Make sure it is behind the text */
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.8);
+            position: fixed; /* Fixed position */
+            top: 0; /* Stick to the top */
+            left: 0; /* Align to the left */
+            width: 100%; /* Full width */
+            z-index: 1000; /* Ensure it stays above other content */
+            border-bottom: 1px solid #009bbd;
+        }
+
+        header .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #00d4ff;
+            text-shadow: 5px 0px 10px #009bbd;
+        }
+
+        header nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        header nav a {
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        header nav a:hover {
+            color: #00d4ff;
+        }
+
+        header .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        header .auth-buttons button {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        header .auth-buttons .signup {
+            background: #00d4ff;
+            color: #ffffff;
+        }
+
+        header .auth-buttons .signup:hover {
+            background: #009bbd;
+        }
+
+        header .auth-buttons .signin {
+            background: transparent;
+            color: #00d4ff;
+            border: 2px solid #00d4ff;
+        }
+
+        header .auth-buttons .signin:hover {
+            background: #00d4ff;
+            color: #ffffff;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+
+        .hero .cta-button {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #ffffff;
+            background: #00d4ff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .hero .cta-button:hover {
+            background: #009bbd;
+        }
+
+        .hero .cta-button-secondary {
+            margin-top: 1rem;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #00d4ff;
+            background: transparent;
+            border: 2px solid #00d4ff;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hero .cta-button-secondary:hover {
+            background: #00d4ff;
+            color: #ffffff;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #2a2a3c, #3b3b54);
+        }
+
+        .features .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .features .feature:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .features .feature h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .features .feature p {
+            font-size: 1rem;
+        }
+
+        .features .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #00d4ff;
+        }
+
+        .testimonials {
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #3b3b54, #4a4a6c);
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .testimonials h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .testimonials .testimonial {
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .testimonials .testimonial p {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.8);
+            color: #ffffff;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        footer p {
+            font-size: 0.9rem;
+        }
+
+        /* Contact Form CSS */
+        #contact-form {
+            z-index: 11; /* Above the overlay */
+            position: fixed;  /* Keep it fixed on the screen */
+            top: 50%;  /* Center vertically */
+            left: 50%;  /* Center horizontally */
+            transform: translate(-50%, -50%);  /* Exact centering */
+            display: none; /* Hidden initially */
+            max-width: 700px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00d4ff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.622);
+            z-index: 11; /* Ensure it's above the overlay */
+        }
+
+        #contact-form div {
+            margin-bottom: 1rem;
+        }
+
+        #contact-form label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        #contact-form input,
+        #contact-form textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 4px;
+        }
+
+        #contact-form button {
+            padding: 0.8rem 1.5rem;
+            font-weight: 700;
+            background: #00d4ff;
+            color: #ffffff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 1rem;  /* Added to make sure both buttons have consistent spacing */
+        }
+
+        #contact-form button:hover {
+            background: #009bbd;
+        }
+
+        #contact-form button[type="button"] {
+            background: transparent;
+            color: #00d4ff;
+            border: 2px solid #00d4ff;
+        }
+
+        #contact-form button[type="button"]:hover {
+            background: #00d4ff;
+            color: #ffffff;
+        }
+        #about {
+            background: linear-gradient(135deg, #2a2a3c, #3b3b54);
+            color: #ffffff;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        #about h2 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            font-weight: 700;
+            color: #00d4ff;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        #about h3 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        #about p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        #about ul {
+            /* list-style-type: none; */
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+
+        #about ul li {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-align: left;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        #about ul li strong {
+            color: #00d4ff;
+        }
+
+        #about a {
+            color: #00d4ff;
+            font-weight: 700;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        #about a:hover {
+            color: #009bbd;
+        }
+
+        #about h3, #about p {
+            margin-top: 1.5rem;
+        }
+
+
+    </style>
+</head>
+<body class="container">
+   <div id="overlay"></div>
+   <div id="navbar">
+    <header>
+        <div class="logo">CodeForge</div>
+        <nav>
+            <a href="#features">Features</a>
+            <a href="#about">About</a>
+            <a href="#testimonials">Testimonials</a>
+            <a href="javascript:void(0);" onclick="toggleContactForm()">Contact</a>
+        </nav>
+        <div class="auth-buttons">
+            <button class="signin" onclick=" window.location.href = '{% url 'loginpage' %}'">Sign In</button>
+        </div>
+    </header>
+</div>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Collaborate. Code. Create.</h1>
+            <p>Join the future of coding with a platform designed for seamless collaboration, powerful tools, and endless possibilities.</p>
+            <button class="cta-button">Get Started</button>
+            <button class="cta-button-secondary">Learn More</button>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="feature">
+            <div class="feature-icon">&#128736;</div>
+            <h3>Real-Time Collaboration</h3>
+            <p>Work together with your team in real-time with live coding sessions and integrated communication tools.</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">&#128187;</div>
+            <h3>AI-Powered Suggestions</h3>
+            <p>Boost productivity with smart AI-powered code suggestions and error detection.</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">&#128221;</div>
+            <h3>Version Control</h3>
+            <p>Track every change with built-in version control and rollback capabilities.</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">&#127760;</div>
+            <h3>Cloud Sync</h3>
+            <p>Access your projects anywhere with secure cloud storage and automatic sync.</p>
+        </div>
+    </section>
+    <section id="about">
+        <h2>About CodeForge</h2>
+        <p>At CodeForge, our mission is to empower developers by providing a platform designed for seamless collaboration, powerful coding tools, and endless possibilities.</p>
+    
+        <h3>Our Features</h3>
+        <ul>
+            <li><strong>Real-Time Collaboration:</strong> Work together with your team in real-time, instantly seeing changes and providing feedback.</li>
+            <li><strong>AI-Powered Suggestions:</strong> Boost your productivity with smart code suggestions, error detection, and performance optimization.</li>
+            <li><strong>Cloud Sync:</strong> Access your projects from anywhere with secure cloud storage and automatic syncing.</li>
+        </ul>
+    
+        <h3>Why CodeForge?</h3>
+        <ul>
+            <li>Seamless integration with your existing tools and workflows.</li>
+            <li>Scalable for individual developers and large teams alike.</li>
+            <li>Constant innovation with new features and improvements.</li>
+        </ul>
+    
+        <h3>Meet Our Team</h3>
+        <p>We are a passionate team of developers, designers, and innovators dedicated to shaping the future of coding and collaboration. Together, we are building the ultimate platform for modern developers.</p>
+    
+        <h3>Join Us</h3>
+        <p>Ready to take your coding experience to the next level? <a href="#signup">Sign up today</a> and start collaborating with developers from around the world!</p>
+    </section>
+    
+    
+    <footer>
+        <p>&copy; 2025 FutureCode. All rights reserved.</p>
+    </footer>
+
+
+    <section id="contact-form">
+        <h2 style="text-align: center; color: #ffffff; margin-bottom: 2rem;">Contact Us</h2>
+        <form>
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div>
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" rows="5" required></textarea>
+            </div>
+            <button type="submit">Send Message</button>
+            <button type="button" onclick="CancelToggle()">Cancel</button>
+        </form>
+    </section>
+
+
+    <script>
+        function toggleContactForm() {
+            const contactForm = document.getElementById("contact-form");
+            const overlay = document.getElementById("overlay");
+            const isFormVisible = contactForm.style.display === "block";
+            
+            // Toggle form visibility
+            contactForm.style.display = isFormVisible ? "none" : "block";
+            overlay.style.display = isFormVisible ? "none" : "block";
+        }
+
+        function CancelToggle(){
+            const contactForm = document.getElementById("contact-form");
+            const overlay = document.getElementById("overlay");
+            
+            // Hide the form and overlay
+            contactForm.style.display = "none";
+            overlay.style.display = "none";
+        }
+
+
+    </script>
+</body>
+</html>
