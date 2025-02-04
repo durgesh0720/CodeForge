@@ -44,9 +44,7 @@ def signupCoder(request):
         if password != confirm_password:
             context = {'error': "Password not matched"}
             return render(request, "authe.html", context)
-
         try:
-            # Create the user if username doesn't already exist
             user = User.objects.create_user(
                 username=username,
                 first_name=first_name,
@@ -68,7 +66,6 @@ def loginCoder(request):
         password = request.POST.get('password')
         try:
             user = authenticate(username=username, password=password)
-            
             if user is not None:
                 login(request, user)
                 return redirect('welcomepage')

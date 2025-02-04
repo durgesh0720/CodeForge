@@ -430,7 +430,7 @@ editor.session.on("change", function () {
             sendCodeUpdate(currentCode);
             lastSentCode = currentCode.trim();  // Update the last sent code
         }
-    },100);
+    },1000);
 });
 
     // Send code updates on the WebSocket
