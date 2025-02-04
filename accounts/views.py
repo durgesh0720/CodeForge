@@ -66,12 +66,13 @@ def loginCoder(request):
     if request.method == "POST":
         username = request.POST.get('username')
         password = request.POST.get('password')
-        user = authenticate(username=username, password=password)
-        
-        if user is not None:
-            login(request, user)
-            return redirect('welcomepage')
-        else:
+        try:
+            user = authenticate(username=username, password=password)
+            
+            if user is not None:
+                login(request, user)
+                return redirect('welcomepage')
+        except:
             context = {'error': "Invalid Credentials"}
             return render(request, "authe.html", context)
     return render(request, "authe.html")
