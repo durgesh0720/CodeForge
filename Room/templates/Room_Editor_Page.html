@@ -165,7 +165,7 @@
 <body>
     <!-- Navbar -->
     <div class="navbar">
-        <div class="greetings">Editing File: {{ file.file_name }}.{{ file.extainson }}</div>
+        <div class="greetings">Editing File: {{ file.file_name }}.{{ file.extension }}</div>
         <div id="projectId" style="display:none;">{{ file.id }}</div>
         <div>Room ID: {{ room_id }}</div>
     </div>
@@ -174,12 +174,12 @@
     <div class="editor-header">
         <div class="editor-buttons">
             <!-- Remove runForm HTTP submission -->
-            <button onclick="runCode()">Run code</button>
+            <button id="runcode" onclick="runCode()">Run code</button>
             <button onclick="clearCode()">Clear</button>
             <form id="saveForm" method="post" action="{% url 'saveCode' %}">
                 {% csrf_token %}
                 <input type="hidden" name="file_id" value="{{ file.id }}">
-                <input type="hidden" name="extainson" value="{{ file.extainson }}">
+                <input type="hidden" name="extainson" value="{{ file.extension }}">
                 <input type="hidden" name="content" id="content">
                 <button type="submit">Save</button>
             </form>
@@ -272,7 +272,7 @@
                 <input type="text" name="file_name" id="newFileName" value="{{ file.file_name }}">
                 <label for="newLanguage">Language</label>
                 <select id="language" name="language" style="width: 98%; padding: 8px; margin: 5px 0;">
-                    <option value="{{ file.extainson }}">{{ file.extainson }}</option>
+                    <option value="{{ file.extension }}">{{ file.extension }}</option>
                     <option value="python3">Python (.py)</option>
                     <option value="javascript">JavaScript (.js)</option>
                     <option value="c">C (.c)</option>
@@ -314,8 +314,8 @@
       const username = "{{ file.user.username }}";
       const room_id = "{{ room_id }}";
       let editor;
-      let extainson = "{{ file.extainson }}";
-      function setLanguageMode(editor, extainson) {
+      let extension = "{{ file.extension }}";
+      function setLanguageMode(editor, extension) {
         const languageModes = {
             javascript: "ace/mode/javascript",
             python3: "ace/mode/python",
@@ -329,7 +329,7 @@
             markdown: "ace/mode/markdown",
             sql: "ace/mode/sql"
         };
-        const mode = languageModes[extainson.toLowerCase()] || "ace/mode/javascript"
+        const mode = languageModes[extension.toLowerCase()] || "ace/mode/javascript"
 
         console.log("Language Mode: ", mode)
 
@@ -338,7 +338,7 @@
       
       // Establish a WebSocket connection.
       // Note: We use the same socket for code updates, chat, and code execution responses.
-      const chatSocket = new WebSocket(`wss://codeforge-ezfh.onrender.com/ws/chat/${room_id}/`);
+      const chatSocket = new WebSocket(`ws://codeforge-ezfh.onrender.com/ws/chat/${room_id}/`);
 
       // Initialize the Ace Editor.
       editor = ace.edit("editor");
@@ -352,7 +352,7 @@
         showFoldWidgets: true,
         wrap: true
     });
-    setLanguageMode(editor,extainson);
+    setLanguageMode(editor,extension);
 
       
     editor.setValue(document.getElementById("ContentField").innerText.trim() || "// Start coding here...");
@@ -376,8 +376,9 @@
         // Execution result message.
         if (data.action === "execution_result") {
             const terminal = document.getElementById("terminal");
+            document.getElementById("runcode").innerText="Run Code";
             terminal.innerText =
-                "Terminal Output:\n" + data.output_data.output +
+                "Terminal Output: " + data.output_data.output +
                 "\nMemory: " + data.output_data.memory +
                 "\nCPU Time: " + data.output_data.cpuTime;
         }
@@ -450,7 +451,7 @@ function sendCodeUpdate(code) {
       function runCode() {
           const code = editor.getValue();
           const file_id = document.getElementById("projectId").innerText; // hidden file id
-          const language = "{{ file.extainson }}";
+          const language = "{{ file.extension }}";
           // Instead of directly evaluating the code in the browser,
           // send a WebSocket message to request code execution.
           chatSocket.send(JSON.stringify({
@@ -459,6 +460,7 @@ function sendCodeUpdate(code) {
               content: code,
               language: language,
           }));
+          document.getElementById("runcode").innerText="Code Running";
       }
 
       // Clear code in the editor.

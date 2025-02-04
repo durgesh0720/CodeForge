@@ -9,7 +9,11 @@ def create_room(request):
         try:
             file_id = request.POST.get('file_id')
             file = File.objects.get(id=file_id)
-            file_output = CurrentOutput.objects.get(file=file)
+            try:
+                file_output = CurrentOutput.objects.get(file=file)
+            except:
+                file_output = None
+
             room_id = f"{request.user.username}{file_id}{file.file_name}"[:20]
 
             room, created = Room.objects.get_or_create(room_id=room_id, defaults={'file': file})

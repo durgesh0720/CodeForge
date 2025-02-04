@@ -15,8 +15,8 @@ class File(models.Model):
 
 class CurrentOutput(models.Model):
     file = models.OneToOneField(File,on_delete=models.CASCADE,related_name='currentoutput')
-    output = models.TextField(blank=True)
-    memory = models.CharField(max_length=50, blank=True)
-    cpuTime = models.CharField(max_length=50, blank=True)
+    output = models.TextField(blank=True,null=True)
+    memory = models.CharField(max_length=50, blank=True,null=True)
+    cpuTime = models.CharField(max_length=50, blank=True,null=True)
 
     

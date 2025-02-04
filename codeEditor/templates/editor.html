@@ -165,7 +165,7 @@
 <body>
     <!-- Navbar -->
     <div class="navbar">
-        <div class="greetings">Editing File:{{ file.file_name }}.{{file.extainson}}</div>
+        <div class="greetings">Editing File:{{ file.file_name }}.{{file.extension}}</div>
         <div id="projectId">{{ file.id }}</div>
     </div>
 
@@ -176,7 +176,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="file_id" value="{{ file.id }}">
                 <input type="hidden" name="content" id="runCode">
-                <input type="hidden" name="language" value="{{ file.extainson }}">
+                <input type="hidden" name="language" value="{{ file.extension }}">
                 <button type="submit">Run code</button>
             </form>
             <button onclick="clearCode()">Clear</button>
@@ -184,7 +184,7 @@
             <form id="saveForm" method="post" action="{% url 'saveCode' %}">
                 {% csrf_token %}
                 <input type="hidden" name="file_id" value="{{ file.id }}">
-                <input type="hidden" name="extainson" value="{{ file.extainson }}">
+                <input type="hidden" name="extainson" value="{{ file.extension }}">
                 <input type="hidden" name="content" id="content">
                 <button type="submit">Save</button>
             </form>            
@@ -281,7 +281,7 @@
                 <input type="text" name="file_name" id="newFileName" value="{{ file.file_name }}">
                 <label for="newLanguage">Language</label>
                 <select id="language" name="language" style="width: 98%; padding: 8px; margin: 5px 0;">
-                    <option value="{{ file.extainson }}">{{ file.extainson }}</option>
+                    <option value="{{ file.extension }}">{{ file.extension }}</option>
                     <option value="python3">Python (.py)</option>
                     <option value="javascript">JavaScript (.js)</option>
                     <option value="c">C (.c)</option>
