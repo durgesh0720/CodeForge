@@ -11,13 +11,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-key")
-REDIS_URL = os.getenv("REDIS_URL", "redis://default:KtciazCZnQSiwszqAibnbEbxqAGqfnof@redis.railway.internal:6379")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = [
-    "codeforge-28dy.onrender.com",
-]
+ALLOWED_HOSTS = ["codeforge-28dy.onrender.com"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://codeforge-28dy.onrender.com",
@@ -77,7 +75,7 @@ DATABASES = {
     "default": dj_database_url.config(
         default=os.getenv(
             "DATABASE_URL",
-            "postgresql://postgres:WuYCUHxVhbzEvEWVBeJkRiWSZrLwTHdT@postgres.railway.internal:5432/railway",
+            "postgresql://postgres:WuYCUHxVhbzEvEWVBeJkRiWSZrLwTHdT@junction.proxy.rlwy.net:29014/railway",
         )
     )
 }
@@ -108,14 +106,4 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
-}
-
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION":  os.getenv('REDIS_URL', 'redis://default:KtciazCZnQSiwszqAibnbEbxqAGqfnof@redis.railway.internal:6379'),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    }
 }

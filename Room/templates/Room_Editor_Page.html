@@ -371,7 +371,7 @@
     
 
     // Establish WebSocket connection.
-    const chatSocket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${room_id}/`);
+    const chatSocket = new WebSocket(`wss://codeforge-28dy.onrender.com/ws/chat/${room_id}/`);
     function debounce(func, timeout = 300) {
         let timer;
         return (...args) => {
