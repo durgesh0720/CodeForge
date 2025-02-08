@@ -16,12 +16,11 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://default:KtciazCZnQSiwszqAibnbEbxqAGq
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [
-    "codeforge-ezfh.onrender.com",
-    "127.0.0.1",
+    "codeforge-28dy.onrender.com",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://codeforge-ezfh.onrender.com",
+    "https://codeforge-28dy.onrender.com",
 ]
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
