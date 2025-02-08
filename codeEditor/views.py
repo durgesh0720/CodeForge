@@ -88,6 +88,39 @@ def update_file(request):
     return redirect(f'/projecteditor/{file_id}/')
 
 @login_required
+def rename_file(request):
+    context={}
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            filename = data.get("new_filename")
+            file_id = data.get("file_id")
+            file = File.objects.get(id=file_id)
+            file.file_name = filename
+            context = {
+                "status": "success",
+                "message": "File successfully renamed"
+            }
+            return JsonResponse(context)
+        except Exception as e:
+            context['message']=e
+            context['status']="Failed"
+            return JsonResponse(context)
+    context['message']="Request method should be POST"
+    return JsonResponse(context)
+
+@csrf_exempt
+def delete_file(request, file_id):
+    if request.method == "DELETE":
+        try:
+            file = File.objects.get(id=file_id)
+            file.delete()
+            return JsonResponse({"message": "File deleted successfully"}, status=200)
+        except File.DoesNotExist:
+            return JsonResponse({"error": "File not found"}, status=404)
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+@login_required
 def execute_code(request):
     if request.method == 'POST':
         context = {}

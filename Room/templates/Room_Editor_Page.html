@@ -6,7 +6,7 @@
     <title>Code Editor</title>
     <style>
         body {
-            font-family: 'Courier New', monospace;
+            font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #1e1e1e;
@@ -160,6 +160,59 @@
             border: 1px solid #444;
             padding:5px;
         }
+        .coding_container{
+            display: flex;
+            flex-direction: row;
+            align-content: flex-start;
+            
+        }
+        #userSidebar{
+            border-radius: 5px;
+            border: 5px solid #444;
+        }
+        #userSidebar small{
+            display: block;
+            border-bottom: 2px solid #005a99;
+            text-align: center;
+            font-weight: bolder;
+            font-size: large;
+        }
+        .user-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .user-card {
+            background: #007acc;
+            padding: 5px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            text-align: center;
+            transition: transform 0.2s ease-in-out;
+        }
+        .user-card:hover {
+            transform: scale(1.05);
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        .user-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+        #userList{
+            list-style: none;
+        }
     </style>
 </head>
 <body>
@@ -188,50 +241,22 @@
                 <label for="themeSelector">Theme:</label>
                 <select id="themeSelector">
                     <optgroup label="Light Themes">
-                        <option value="chrome">Chrome</option>
-                        <option value="clouds">Clouds</option>
-                        <option value="clouds_midnight">Clouds Midnight</option>
-                        <option value="dawn">Dawn</option>
-                        <option value="dreamweaver">Dreamweaver</option>
-                        <option value="eclipse">Eclipse</option>
-                        <option value="github">GitHub</option>
-                        <option value="iplastic">IPlastic</option>
-                        <option value="solarized_light">Solarized Light</option>
-                        <option value="textmate">Textmate</option>
-                        <option value="tomorrow">Tomorrow</option>
-                        <option value="xcode">Xcode</option>
-                        <option value="kuroir">Kuroir</option>
-                        <option value="katzenmilch">Katzenmilch</option>
+                        <option value="vs">Visual Studio (vs)</option>
+                        <option value="hc-light">High Contrast Light</option>
                     </optgroup>
                     <optgroup label="Dark Themes">
-                        <option value="ambiance">Ambiance</option>
-                        <option value="chaos">Chaos</option>
-                        <option value="cloud9_night">Cloud9 Night</option>
-                        <option value="clouds_midnight">Clouds Midnight</option>
-                        <option value="cobalt">Cobalt</option>
-                        <option value="dracula">Dracula</option>
-                        <option value="gob">Gob</option>
-                        <option value="gruvbox">Gruvbox</option>
-                        <option value="idle_fingers">Idle Fingers</option>
-                        <option value="kr_theme">KR Theme</option>
-                        <option value="merbivore">Merbivore</option>
-                        <option value="merbivore_soft">Merbivore Soft</option>
-                        <option value="mono_industrial">Mono Industrial</option>
+                        <option value="vs-dark">Visual Studio Dark (vs-dark)</option>
+                        <option value="hc-black">High Contrast Black</option>
                         <option value="monokai">Monokai</option>
-                        <option value="pastel_on_dark">Pastel on Dark</option>
-                        <option value="solarized_dark">Solarized Dark</option>
-                        <option value="terminal">Terminal</option>
-                        <option value="tomorrow_night">Tomorrow Night</option>
-                        <option value="tomorrow_night_blue">Tomorrow Night Blue</option>
-                        <option value="tomorrow_night_bright">Tomorrow Night Bright</option>
-                        <option value="tomorrow_night_eighties">Tomorrow Night Eighties</option>
-                        <option value="twilight">Twilight</option>
-                        <option value="vibrant_ink">Vibrant Ink</option>
+                        <option value="dracula">Dracula</option>
+                        <option value="solarized-dark">Solarized Dark</option>
+                        <option value="gruvbox-dark">Gruvbox Dark</option>
                     </optgroup>
                 </select>
-                
+                             
                 <label for="fontSizeSelector">Font Size:</label>
                 <input id="fontSizeSelector" type="number" value="14" min="8" max="24" step="1"> px
+                <button onclick="formatCode()">Format Code</button>
             </div>
             </div>
             
@@ -239,9 +264,15 @@
         <div id="timedate">Last Update: {{ file.updated_at }}</div>
     </div>
 
-    <!-- Ace Editor -->
-    <div id="ContentField" style="display: none;">{{ file.content }}</div>
-    <div id="editor"></div>
+    <div class="coding_container">
+        <!-- Ace Editor -->
+        <div id="ContentField" style="display: none;">{{ file.content }}</div>
+        <div id="editor"></div>
+        <div id="userSidebar" style="width: 300px; background: #2c2c2c; padding: 10px; border-left: 1px solid #444;">
+            <small>Connected Coders</small>
+            <ul id="userList" class="user-container"></ul>
+        </div>
+    </div>
 
     <!-- Terminal -->
     <div id="terminal">
@@ -307,213 +338,391 @@
         <input type="text"id="Currentusername" value="{{ file.user.username }}">
     </div>
     
-    <!-- Ace Editor Script -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ext-language_tools.js"></script>
-  <script>
-      const username = "{{ file.user.username }}";
-      const room_id = "{{ room_id }}";
-      let editor;
-      let extension = "{{ file.extension }}";
-      function setLanguageMode(editor, extension) {
+    <script>window.define = undefined;</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.22.9/babel.min.js"></script>
+
+    <!-- Properly configure Monaco Editor -->
+    <script>
+        var require = { paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs' } };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/loader.min.js"></script>
+
+<script>
+    const username = "{{ username }}";
+    const room_id = "{{ room_id }}";
+    let extension = "{{ file.extension }}";
+
+    function getLanguageMode(extension) {
         const languageModes = {
-            javascript: "ace/mode/javascript",
-            python3: "ace/mode/python",
-            java: "ace/mode/java",
-            html: "ace/mode/html",
-            css: "ace/mode/css",
-            ruby: "ace/mode/ruby",
-            php: "ace/mode/php",
-            c: "ace/mode/c",
-            cpp: "ace/mode/c_cpp",
-            markdown: "ace/mode/markdown",
-            sql: "ace/mode/sql"
+            javascript: "javascript",
+            python3: "python",
+            java: "java",
+            html: "html",
+            css: "css",
+            ruby: "ruby",
+            php: "php",
+            c: "c",
+            cpp: "cpp",
+            markdown: "markdown",
+            sql: "sql"
         };
-        const mode = languageModes[extension.toLowerCase()] || "ace/mode/javascript"
-
-        console.log("Language Mode: ", mode)
-
-        editor.session.setMode(mode);  // Set the language mode in the editor
+        return languageModes[extension.toLowerCase()] || "javascript";
     }
-      
-      // Establish a WebSocket connection.
-      // Note: We use the same socket for code updates, chat, and code execution responses.
-      const chatSocket = new WebSocket(`wss://codeforge-ezfh.onrender.com/ws/chat/${room_id}/`);
+    
 
-      // Initialize the Ace Editor.
-      editor = ace.edit("editor");
-      editor.setTheme("ace/theme/ambiance");
-      editor.setFontSize(16);
-      editor.setOption("wrap", true);
-      editor.setOptions({
-        enableBasicAutocompletion: true,
-        enableLiveAutocompletion: true,
-        showLineNumbers: true,
-        showFoldWidgets: true,
-        wrap: true
-    });
-    setLanguageMode(editor,extension);
+    // Establish WebSocket connection.
+    const chatSocket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${room_id}/`);
+    function debounce(func, timeout = 300) {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => { func.apply(this, args); }, timeout);
+        };
+    }
+    
+    const sendCodeUpdate = debounce(() => {
+        if (window.editor) {
+            let code = editor.getValue();
+            let cursorPosition = editor.getPosition();
+            chatSocket.send(JSON.stringify({
+                action: "code_update",
+                username: username,
+                code: code,
+                cursor_position: cursorPosition
+            }));
+        }
+    }, 300);
 
-      
-    editor.setValue(document.getElementById("ContentField").innerText.trim() || "// Start coding here...");
-
-      // WebSocket message handling.
+        // WebSocket message handling
     chatSocket.onopen = function () {
         console.log("WebSocket connection established.");
     };
-
-    chatSocket.onmessage = function (event) {
-        const data = JSON.parse(event.data);
-        console.log("Received WebSocket message:", data.code);  // Log the received data
-
-        if (data.action === "code_update") {
-            if (editor.getValue() !== data.code) {  // Prevent redundant updates
-                const cursorPosition = data.cursor_position;
-                editor.setValue(data.code, -1);  // Update without moving cursor to the end
-                editor.moveCursorTo(cursorPosition.row, cursorPosition.column);
+    
+        chatSocket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+    
+            if (data.action === "code_update") {
+                if (editor.getValue() !== data.code) {
+                    editor.executeEdits("", [
+                        { range: editor.getModel().getFullModelRange(), text: data.code }
+                    ]);
+                }
             }
-        }
-        // Execution result message.
-        if (data.action === "execution_result") {
-            const terminal = document.getElementById("terminal");
-            document.getElementById("runcode").innerText="Run Code";
-            terminal.innerText =
-                "Terminal Output: " + data.output_data.output +
-                "\nMemory: " + data.output_data.memory +
-                "\nCPU Time: " + data.output_data.cpuTime;
-        }
-        // Chat message handling.
-        if (data.action === 'message') {
-            const messageElement = document.createElement("div");
-            messageElement.innerHTML = `@${data.username}: <br>${data.message}`;
-            messageElement.style.padding = "8px";
-            messageElement.style.marginBottom = "5px";
-            messageElement.style.borderRadius = "5px";
-            messageElement.style.background = "#333";
-            document.getElementById("chatMessages").appendChild(messageElement);
-            // Optionally, display a notification or a different visual effect for the message
-            console.log(`Message received from ${data.username}: ${data.message}`);
-        }
-};
-
-
-chatSocket.onclose = function () {
-    console.log("WebSocket connection closed.");
-};
-
+            if (data.action === "execution_result") {
+                const terminal = document.getElementById("terminal");
+                document.getElementById("runcode").innerText = "Run Code";
+                terminal.innerText =
+                    "Terminal Output: " + data.output_data.output +
+                    "\nMemory: " + data.output_data.memory +
+                    "\nCPU Time: " + data.output_data.cpuTime;
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+            if (data.action === 'message') {
+                const messageElement = document.createElement("div");
+                messageElement.innerHTML = `@${data.username}: <br>${data.message}`;
+                messageElement.classList.add("chat-message");
+                document.getElementById("chatMessages").appendChild(messageElement);
+            }
+            if (data.action === "user_list_update") {
+                const userList = document.getElementById("userList");
+                userList.innerHTML = "";
+                data.users.forEach(user => {
+                    const li = document.createElement("li");
+                    li.classList.add("user-card");
+                    li.innerHTML = `
+                        <img src="https://i.pravatar.cc/60?img=${Math.floor(Math.random() * 10) + 1}" alt="${user}" class="user-avatar">
+                        <div class="user-name">${user}</div>
+                    `;
+                    userList.appendChild(li);
+                });
+            }
+        };
+    chatSocket.onclose = function () {
+            console.log("WebSocket connection closed.");
+    };
+    
     // Chat message sending.
-document.getElementById("chatInput").addEventListener("keypress", function (event) {
-    if (event.key === "Enter" && this.value.trim() !== "") {
-        event.preventDefault();
-        sendMessage(username, this.value.trim());
-        this.value = "";
-    }
-});
-
+    document.getElementById("chatInput").addEventListener("keypress", function (event) {
+        if (event.key === "Enter" && this.value.trim() !== "") {
+            event.preventDefault();
+            sendMessage(username, this.value.trim());
+            this.value = "";
+        }
+    });
+    
     function sendMessage(username, message) {
         if (message.trim() !== "") {
             chatSocket.send(JSON.stringify({
-                action: 'message',  // Ensure 'message' is being sent as action
+                action: 'message',
                 username: username,
                 message: message
             }));
         }
     }
+    
+    // Run code via WebSocket.
+    function runCode() {
+        const runBtn = document.getElementById("runcode");
+        runBtn.innerText = "Running...";
+        runBtn.disabled = true;
 
-      // Send code updates on editor changes (debounced to reduce spam).
-let debounceTimeout;
-let lastSentCode = '';
-editor.session.on("change", function () {
-    clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(() => {
-        const currentCode = editor.getValue();
-        if (currentCode.trim() !== lastSentCode.trim()) {
-            sendCodeUpdate(currentCode);
-            lastSentCode = currentCode.trim();  // Update the last sent code
+        chatSocket.send(JSON.stringify({
+            action: "run_code",
+            file_id: document.getElementById("projectId").innerText,
+            content: editor.getValue(),
+            language: extension,
+        }));
+
+        setTimeout(() => {
+            runBtn.innerText = "Run Code";
+            runBtn.disabled = false;
+        }, 5000);
+    }
+
+
+    
+    // Clear code in the editor.
+    function clearCode() {
+        editor.setValue("");
+    }
+    // Toggle chat visibility.
+    function toggleChat() {
+        const chatBox = document.getElementById('chatBox');
+        chatBox.style.display = (chatBox.style.display === 'none' || chatBox.style.display === '') ? 'block' : 'none';
+    }
+    
+    function loadCustomTheme(themeName) {
+        if (themeName === "monokai") {
+            monaco.editor.defineTheme("monokai", {
+                base: "vs-dark",
+                inherit: true,
+                rules: [
+                    { token: "comment", foreground: "75715e" },
+                    { token: "string", foreground: "e6db74" },
+                    { token: "keyword", foreground: "f92672" },
+                    { token: "variable", foreground: "a6e22e" },
+                    { token: "number", foreground: "ae81ff" },
+                ],
+                colors: {
+                    "editor.background": "#272822",
+                    "editor.foreground": "#F8F8F2",
+                    "editor.lineHighlightBackground": "#3E3D32",
+                    "editor.selectionBackground": "#49483E",
+                    "editorCursor.foreground": "#F8F8F0"
+                }
+            });
+        } else if (themeName === "dracula") {
+            monaco.editor.defineTheme("dracula", {
+                base: "vs-dark",
+                inherit: true,
+                rules: [
+                    { token: "comment", foreground: "6272a4" },
+                    { token: "string", foreground: "f1fa8c" },
+                    { token: "keyword", foreground: "ff79c6" },
+                    { token: "variable", foreground: "50fa7b" },
+                    { token: "number", foreground: "bd93f9" },
+                ],
+                colors: {
+                    "editor.background": "#282a36",
+                    "editor.foreground": "#F8F8F2",
+                    "editor.lineHighlightBackground": "#44475a",
+                    "editor.selectionBackground": "#44475a",
+                    "editorCursor.foreground": "#F8F8F2"
+                }
+            });
+        } else if (themeName === "solarized-dark") {
+            monaco.editor.defineTheme("solarized-dark", {
+                base: "vs-dark",
+                inherit: true,
+                rules: [
+                    { token: "comment", foreground: "839496" },
+                    { token: "string", foreground: "2aa198" },
+                    { token: "keyword", foreground: "859900" },
+                    { token: "variable", foreground: "b58900" },
+                    { token: "number", foreground: "d33682" },
+                ],
+                colors: {
+                    "editor.background": "#002b36",
+                    "editor.foreground": "#839496",
+                    "editor.lineHighlightBackground": "#073642",
+                    "editor.selectionBackground": "#073642",
+                    "editorCursor.foreground": "#839496"
+                }
+            });
+        } else if (themeName === "gruvbox-dark") {
+            monaco.editor.defineTheme("gruvbox-dark", {
+                base: "vs-dark",
+                inherit: true,
+                rules: [
+                    { token: "comment", foreground: "928374" },
+                    { token: "string", foreground: "b8bb26" },
+                    { token: "keyword", foreground: "fb4934" },
+                    { token: "variable", foreground: "fabd2f" },
+                    { token: "number", foreground: "d3869b" },
+                ],
+                colors: {
+                    "editor.background": "#282828",
+                    "editor.foreground": "#ebdbb2",
+                    "editor.lineHighlightBackground": "#3c3836",
+                    "editor.selectionBackground": "#504945",
+                    "editorCursor.foreground": "#ebdbb2"
+                }
+            });
         }
-    },1000);
+
+        // Apply the new theme
+        monaco.editor.setTheme(themeName);
+    }
+    async function formatCode() {
+        try {
+            let code = editor.getValue();
+            let formattedCode = await prettier.format(code, {
+                parser: "babel",
+                plugins: [prettierPlugins.babel]
+            });
+            editor.setValue(formattedCode);
+        } catch (error) {
+            console.error("Prettier formatting failed:", error);
+        }
+    }
+
+    async function formatCode() {
+        try {
+            let code = editor.getValue();
+            let formattedCode = await prettier.format(code, {
+                parser: "babel",
+                plugins: [prettierPlugins.babel]
+            });
+            editor.setValue(formattedCode);
+        } catch (error) {
+            console.error("Prettier formatting failed:", error);
+        }
+    }
+    function openSaveAsModal() {
+        document.getElementById('saveAsModal').style.display = 'block';
+    }
+
+    function closeSaveAsModal() {
+        document.getElementById('saveAsModal').style.display = 'none';
+    }
+    // Font Size Selector
+    document.getElementById("fontSizeSelector").addEventListener("input", function () {
+        editor.updateOptions({ fontSize: parseInt(this.value, 10) });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+    if (!window.monacoLoaded) {
+        require(["vs/editor/editor.main"], function () {
+            window.monacoLoaded = true;
+            console.log("✅ Monaco Editor loaded!");
+
+            // Register languages
+            monaco.languages.register({ id: "javascript" });
+            monaco.languages.register({ id: "python" });
+            monaco.languages.register({ id: "java" });
+            monaco.languages.register({ id: "c" });
+            monaco.languages.register({ id: "cpp" });
+            monaco.languages.register({ id: "php" });
+            monaco.languages.register({ id: "sql" });
+            monaco.languages.register({ id: "ruby" });
+            monaco.languages.register({ id: "html" });
+            monaco.languages.register({ id: "css" });
+            monaco.languages.register({ id: "markdown" });
+
+            // Create editor instance
+            window.editor = monaco.editor.create(document.getElementById("editor"), {
+                value: "// Start coding here...",
+                language: getLanguageMode(extension),
+                theme: "vs-dark",
+                fontSize: 16,
+                automaticLayout: true,
+                tabSize: 4,
+                insertSpaces: true,
+                trimAutoWhitespace: true,
+                wordWrap: "on"
+            });
+
+            // Enable IntelliSense
+            enableIntelliSense();
+
+            // Attach font size event
+            document.getElementById("fontSizeSelector").addEventListener("input", function () {
+                if (window.editor) {
+                    editor.updateOptions({ fontSize: parseInt(this.value, 10) });
+                } else {
+                    console.warn("⚠️ Monaco Editor not initialized yet.");
+                }
+            });
+        });
+    }
 });
 
-    // Send code updates on the WebSocket
-function sendCodeUpdate(code) {
-    const cursorPosition = editor.getCursorPosition();  // Store cursor position
-    chatSocket.send(JSON.stringify({
-        action: "code_update",
-        username: username,
-        code: code,
-        cursor_position: cursorPosition,  // Send cursor position
-    }));
+function enableIntelliSense() {
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+        noLib: false,
+        allowNonTsExtensions: true,
+    });
+    monaco.languages.registerCompletionItemProvider("javascript", {
+        provideCompletionItems: function (model, position) {
+            return {
+                suggestions: [
+                    {
+                        label: "console.log",
+                        kind: monaco.languages.CompletionItemKind.Function,
+                        insertText: "console.log(${1:object});",
+                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        documentation: "Logs output to the console"
+                    },
+                    {
+                        label: "fetch",
+                        kind: monaco.languages.CompletionItemKind.Function,
+                        insertText: "fetch('${1:url}').then(response => response.json()).then(data => console.log(data));",
+                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        documentation: "Fetch API for making HTTP requests"
+                    }
+                ]
+            };
+        }
+    });
+    monaco.languages.registerCompletionItemProvider("python", {
+        provideCompletionItems: function (model, position) {
+            return {
+                suggestions: [
+                    {
+                        label: "print",
+                        kind: monaco.languages.CompletionItemKind.Function,
+                        insertText: "print(${1:'Hello, world!'})",
+                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        documentation: "Prints output to the console"
+                    },
+                    {
+                        label: "import os",
+                        kind: monaco.languages.CompletionItemKind.Module,
+                        insertText: "import os",
+                        documentation: "Import OS module"
+                    }
+                ]
+            };
+        }
+    });
+
+    console.log("🚀 IntelliSense enabled!");
 }
 
-
-
-      // Run code via WebSocket.
-      function runCode() {
-          const code = editor.getValue();
-          const file_id = document.getElementById("projectId").innerText; // hidden file id
-          const language = "{{ file.extension }}";
-          // Instead of directly evaluating the code in the browser,
-          // send a WebSocket message to request code execution.
-          chatSocket.send(JSON.stringify({
-              action: "run_code",
-              file_id: file_id,
-              content: code,
-              language: language,
-          }));
-          document.getElementById("runcode").innerText="Code Running";
-      }
-
-      // Clear code in the editor.
-      function clearCode() {
-          editor.setValue("");
-      }
-
-      // Open and close Save As Modal.
-      function openSaveAsModal() {
-          document.getElementById('saveAsModal').style.display = 'block';
-      }
-      function closeSaveAsModal() {
-          document.getElementById('saveAsModal').style.display = 'none';
-      }
-      function toggleChat() {
-            const chatBox = document.getElementById('chatBox');
-            // Toggle the display of the chat box
-            if (chatBox.style.display === 'none' || chatBox.style.display === '') {
-                chatBox.style.display = 'block';
-            } else {
-                chatBox.style.display = 'none';
-            }
-        }
-
-
-
-      // Theme and Font Size selectors.
-      const themeSelector = document.getElementById("themeSelector");
-      themeSelector.addEventListener("change", function () {
-          editor.setTheme("ace/theme/" + themeSelector.value);
-      });
-
-      const fontSizeSelector = document.getElementById("fontSizeSelector");
-      fontSizeSelector.addEventListener("input", function () {
-          editor.setFontSize(parseInt(fontSizeSelector.value, 10));
-      });
-
-      // Saving code using HTTP form submission (unchanged)
-      document.getElementById('saveForm').addEventListener('submit', function(event) {
-          event.preventDefault(); // Prevent page reload
-          const codeField = document.getElementById('content');
-          codeField.value = editor.getValue();
-          fetch(this.action, {
-              method: "POST",
-              body: new FormData(this),
-          })
-          .then(response => response.json())
-          .then(data => {
-              console.log("Saved successfully", data);
-          })
-          .catch(error => console.error("Save failed", error));
-
-      });
-  </script>
-</body>
-</html>
+    // Save code via HTTP form submission
+    document.getElementById('saveForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        document.getElementById('content').value = editor.getValue();
+        fetch(this.action, {
+            method: "POST",
+            body: new FormData(this),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Saved successfully", data);
+        })
+        .catch(error => console.error("Save failed", error));
+    });
+    </script>
+    </body>
+    </html>

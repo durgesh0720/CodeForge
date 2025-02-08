@@ -26,7 +26,7 @@ def loginPage(request):
 def welcomePage(request):
     context = {}
     try:
-        coder_instance = coder.objects.get(user=request.user)
+        coder_instance = User.objects.get(user=request.user)
         context['coder'] = coder_instance
     except coder.DoesNotExist:
         context['coder'] = None  # Explicitly set to None if the coder instance doesn't exist
@@ -64,17 +64,25 @@ def loginCoder(request):
     if request.method == "POST":
         username = request.POST.get('username')
         password = request.POST.get('password')
+        context={}
         try:
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('welcomepage')
+                context['coder']=User.objects.get(username=username)
+                return render(request, 'welcome.html',context)
         except:
             context = {'error': "Invalid Credentials"}
-            return render(request, "authe.html", context)
+            return render(request, "authe.html",context)
     return render(request, "authe.html")
         
 def logoutCoder(request):
     logout(request)
     return redirect('homepage')
+
+def privacy_policy(request):
+    return render(request,"privacy-policy.html")
+
+def terms_of_condition(request):
+    return render(request,"terms-of-condition.html")
         

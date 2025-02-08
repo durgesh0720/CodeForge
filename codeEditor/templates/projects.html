@@ -6,17 +6,119 @@
     <title>Project Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        #customAlert {
+            display: none;
+            position: fixed;
+            top: 5%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #721c24;
+            padding: 20px;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+            z-index: 9999;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        #progressBar {
+            width: 0;
+            transition: width 1s linear;
+        }
+        #confirmModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /* background: rgba(0, 0, 0, 0.5); */
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #confirmModal .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #confirmModal .modal-content h2 {
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #confirmModal .modal-content button {
+            width: 45%;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <!-- <div id="customAlert">This alert will close in 5 seconds.</div> -->
+      <!-- Success Alert -->
+    <div class="max-w-4xl mx-auto space-y-4">
+        <div id="customAlert" class="flex items-center p-4 bg-green-100 border-l-4 border-green-500 rounded-lg shadow-lg" role="alert">
+            <div class="flex-shrink-0">
+                <i class="fas fa-check-circle text-green-500 text-xl"></i>
+            </div>
+            <div class="ml-3 flex-1">
+                <p id="msgfield" class="text-sm font-medium text-green-700"></p>
+                <div class="mt-2 h-2 bg-green-200 rounded-full">
+                    <div id="progressBar" class="h-2 bg-green-500 rounded-full w-0"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="confirmModal" class="fixed inset-0 flex justify-center items-center z-50 hidden bg-gray-800 bg-opacity-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <div class="text-center">
+                <i class="fas fa-exclamation-triangle text-yellow-500 text-4xl"></i>
+                <h2 class="text-xl font-semibold mt-4 text-gray-800">Are you sure?</h2>
+                <p class="mt-2 text-gray-600">This action will permanently delete the file.</p>
+            </div>
+            <div class="mt-4 flex justify-around">
+                <button id="confirmYes" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Yes, delete</button>
+                <button id="confirmNo" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
     <header class="bg-white dark:bg-gray-800 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-4">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Welcome, {{ user.first_name }} {{ user.last_name }}!</h1>
             </div>
-            <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+            <!-- <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                 <i class="fas fa-moon dark:hidden text-gray-600"></i>
                 <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
-            </button>
+            </button> -->
+            <div class="relative">
+                <!-- User Profile Button -->
+                <button id="userProfileBtn" class="flex items-center space-x-2 p-2 bg-blue-600 text-white rounded-lg">
+                  <!-- <img src="path/to/profile-image.jpg" alt="User" class="w-8 h-8 rounded-full"> -->
+                  <span>{{user.username}}</span>
+                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+              
+                <!-- Dropdown Menu -->
+                <div id="userProfileDropdown" class="dropdown-menu hidden absolute right-0 mt-2 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+                  <ul class="text-gray-900 dark:text-white">
+                    <!-- <li class="px-4 py-2 cursor-pointer rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">View Profile</li>
+                    <li class="px-4 py-2 cursor-pointer rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">Settings</li> -->
+                    <li class="px-4 py-2 cursor-pointer rounded-lg text-white bg-red-600 hover:bg-red-700" onclick="window.location.href='{% url 'logoutcoder' %}'">Logout</li>
+                  </ul>
+                </div>
+              </div>
         </div>
     </header>
 
@@ -37,14 +139,33 @@
     </nav>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             <!-- Project Cards -->
             {% for file in files %}
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ file.file_name }}.{{ file.extainson }}</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 relative">
+                <div class="absolute top-2 right-2">
+                    <button class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200" onclick="toggleMenu(event)">
+                        <span class="material-icons text-2xl"><i class="fa-solid fa-ellipsis-vertical"></i></span>
+                    </button>
+                </div>
+                <!-- Three dot menu  -->
+                <div id="threedotMenu" class="dropdown-menu hidden absolute right-0 mt-2 bg-white dark:bg-gray-800 shadow-xl rounded-lg border-2 border-indigo-500 transition-all duration-300 transform scale-95 hover:scale-100">
+                    <ul class="text-gray-900 dark:text-white">
+                        <li class="px-4 py-3 cursor-pointer rounded-lg flex items-center space-x-2 hover:bg-indigo-100 dark:hover:bg-indigo-700 transition-all duration-200">
+                            <i class="fa-solid fa-pen-to-square" style="color: #2563eb;"></i>
+                            <span>Rename</span>
+                        </li>
+                        <li class="px-4 py-3 cursor-pointer rounded-lg flex items-center space-x-2 hover:bg-red-100 dark:hover:bg-red-700 transition-all duration-200" onclick="showConfirmModal('{{ file.id }}')">
+                            <i class="fa-solid fa-trash-can" style="color: #ef4444;"></i>
+                            <span>Delete</span>
+                        </li>
+                    </ul>
+                </div>                
+
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ file.file_name }}.{{ file.extension }}</h3>
                 <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    <p>Created: {{ file.created_at }}</p>
-                    <p>Last Updated: {{ file.updated_at }}</p>
+                    <small>Created: {{ file.created_at }}</small><br>
+                    <small>Last Updated: {{ file.updated_at }}</small>
                 </div>
                 <div class="mt-4 bg-gray-100 dark:bg-gray-700 rounded p-3">
                     <code class="text-sm text-gray-800 dark:text-gray-200">{{ file.content|truncatewords:5 }}</code>
@@ -53,6 +174,7 @@
                     Open Project
                 </button>
             </div>
+            
             {% endfor %}
         </div>
     </main>
@@ -68,7 +190,7 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Select File</label>
                             <select id="file-extension" name="file_id" class="mt-5 p-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 {% for file in files %}
-                                <option value="{{ file.id }}">{{file.file_name}}.{{ file.extainson }}</option>
+                                <option value="{{ file.id }}">{{file.file_name}}.{{ file.extension }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -120,7 +242,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">File Extension</label>
                             <select id="file-extension" name="language" class="mt-1 p-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                <option value="{{ file.extainson }}">{{ file.extainson }}</option>
+                                <option value="{{ file.extension }}">{{ file.extension }}</option>
                                 <option value="python3">Python (.py)</option>
                                 <option value="javascript">JavaScript (.js)</option>
                                 <option value="c">C (.c)</option>
@@ -157,8 +279,6 @@
             </div>
         </div>
     </div>
-
-    
 
     <script>
         // Open the "Create New File" modal
@@ -206,7 +326,99 @@
         if(error){
             alert("Error: ",error)
         }
-    
+
+        function toggleMenu(event) {
+    // Prevent the button click from propagating and triggering other actions
+            event.stopPropagation();
+
+            // Find the closest dropdown-menu related to the clicked button
+            const dropdown = event.target.closest('.relative').querySelector('.dropdown-menu');
+            
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
+            }
+        }
+
+        // Close the dropdown if clicked outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.dropdown-menu');
+            if (dropdown && !event.target.closest('.relative') && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        function showCustomAlert(msg) {
+            const alertBox = document.getElementById("customAlert");
+            const msgField = document.getElementById("msgfield");
+            const progressBar = document.getElementById("progressBar");
+
+            msgField.textContent = msg;
+            alertBox.style.display = "flex";
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = progress + "%";
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        location.reload(); // Reload after the alert and progress are done
+                    }, 1000); // Delay before reloading to allow full progress display
+                }
+            }, 200); // Update every 200ms to create the progress effect
+        }
+                function showConfirmModal(file_id) {
+            const confirmModal = document.getElementById('confirmModal');
+            const confirmYesButton = document.getElementById('confirmYes');
+            const confirmNoButton = document.getElementById('confirmNo');
+
+            // Show the modal
+            confirmModal.style.display = 'flex';
+
+            // Handle "Yes" button click
+            confirmYesButton.onclick = async function() {
+                try {
+                    await deleteFile(file_id);
+                    confirmModal.style.display = 'none'; // Close the modal
+                } catch (error) {
+                    console.error('Error during deletion:', error);
+                }
+            };
+
+            // Handle "No" button click
+            confirmNoButton.onclick = function() {
+                confirmModal.style.display = 'none'; // Just close the modal if canceled
+            };
+        }
+
+        async function deleteFile(file_id) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/delete_file/${file_id}/`, {
+                    method: "DELETE",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}", // Ensure CSRF token is correctly included
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: Failed to delete file`);
+                }
+
+                const data = await response.json(); // Wait for response JSON
+                showCustomAlert(data.message || "File deleted successfully");
+
+            } catch (error) {
+                console.error("Error deleting file:", error);
+                showCustomAlert("There was an error deleting the file.");
+            }
+        }
+        document.getElementById('userProfileBtn').addEventListener('click', function() {
+        const dropdown = document.getElementById('userProfileDropdown');
+        dropdown.classList.toggle('hidden');
+        });
+
+
     </script>
     
 </body>
