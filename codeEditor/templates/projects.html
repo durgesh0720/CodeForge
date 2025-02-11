@@ -393,7 +393,7 @@
 
         async function deleteFile(file_id) {
             try {
-                const response = await fetch(`http://127.0.0.1:8000/delete_file/${file_id}/`, {
+                const response = await fetch(`https://codeforge-28dy.onrender.com/delete_file/${file_id}/`, {
                     method: "DELETE",
                     headers: {
                         "X-CSRFToken": "{{ csrf_token }}", // Ensure CSRF token is correctly included
