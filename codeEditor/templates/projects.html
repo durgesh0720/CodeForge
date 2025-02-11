@@ -368,28 +368,28 @@
             }, 200); // Update every 200ms to create the progress effect
         }
                 function showConfirmModal(file_id) {
-            const confirmModal = document.getElementById('confirmModal');
-            const confirmYesButton = document.getElementById('confirmYes');
-            const confirmNoButton = document.getElementById('confirmNo');
+                    const confirmModal = document.getElementById('confirmModal');
+                    const confirmYesButton = document.getElementById('confirmYes');
+                    const confirmNoButton = document.getElementById('confirmNo');
 
-            // Show the modal
-            confirmModal.style.display = 'flex';
+                    // Show the modal
+                    confirmModal.style.display = 'flex';
 
-            // Handle "Yes" button click
-            confirmYesButton.onclick = async function() {
-                try {
-                    await deleteFile(file_id);
-                    confirmModal.style.display = 'none'; // Close the modal
-                } catch (error) {
-                    console.error('Error during deletion:', error);
+                    // Handle "Yes" button click
+                    confirmYesButton.onclick = async function() {
+                        try {
+                            await deleteFile(file_id);
+                            confirmModal.style.display = 'none'; // Close the modal
+                        } catch (error) {
+                            console.error('Error during deletion:', error);
+                        }
+                    };
+
+                    // Handle "No" button click
+                    confirmNoButton.onclick = function() {
+                        confirmModal.style.display = 'none'; // Just close the modal if canceled
+                    };
                 }
-            };
-
-            // Handle "No" button click
-            confirmNoButton.onclick = function() {
-                confirmModal.style.display = 'none'; // Just close the modal if canceled
-            };
-        }
 
         async function deleteFile(file_id) {
             try {

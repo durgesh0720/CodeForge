@@ -6,6 +6,7 @@ from .models import Room
 def create_room(request):
     if request.method == 'POST':
         context = {}
+        room = None
         try:
             file_id = request.POST.get('file_id')
             file = File.objects.get(id=file_id)
@@ -13,12 +14,11 @@ def create_room(request):
                 file_output = CurrentOutput.objects.get(file=file)
             except:
                 file_output = None
-
             room_id = f"{request.user.username}{file_id}{file.file_name}"[:20]
 
-            room, created = Room.objects.get_or_create(room_id=room_id, defaults={'file': file})
+            room, created = Room.objects.get_or_create(file=file, defaults={"file_id": file_id})
 
-            context['room_id'] = room.room_id
+            context['room_id'] = room_id
             context['file'] = file
             context['file_output'] = file_output
             context['username'] = request.user.username

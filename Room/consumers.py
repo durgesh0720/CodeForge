@@ -153,32 +153,27 @@ class CodeEditorRoom(AsyncWebsocketConsumer):
 
     async def execute_code(self, script, language):
         """Calls external API to execute code."""
-        exec_url = "https://api.jdoodle.com/v1/execute"
-        version_index = await self.get_version_index(language)
-        version_index = await self.get_version_index(language)
-        if version_index == "Unknown":
-            return {"output": "Error: Unsupported language", "memory": "", "cpuTime": ""}
-
-
+        exec_url = "https://emkc.org/api/v2/piston/execute"
         exec_data = {
-            "script": script,
-            "stdin": "",
-            "language": language,
-            "versionIndex": version_index,
-            "clientId": self.JD_CLIENT_ID,
-            "clientSecret": self.JD_CLIENT_SECRET
+            "language":language,
+            "version": await self.get_version(language),
+            "files":[{"name":"main","content":script}],
+            "stdin":"",
         }
-
         try:
             exec_response = requests.post(exec_url, json=exec_data)
 
             if exec_response.status_code == 200:
                 exec_json = exec_response.json()
-                return {
-                    'output': exec_json.get('output', ''),
-                    'memory': exec_json.get('memory', ''),
-                    'cpuTime': exec_json.get('cpuTime', ''),
-                }
+                return ({
+                    "output": exec_json.get("run", {}).get("stdout", ""),
+                    "error": exec_json.get("run", {}).get("stderr", ""),
+                    "exit_code": exec_json.get("run", {}).get("code", ""),
+                    "cpuTime": exec_json.get("run", {}).get("time", ""),
+                    "memory": exec_json.get("run", {}).get("memory", ""),
+                    "language": exec_json.get("language", ""),
+                    "version": exec_json.get("version", "")
+                })
             else:
                 print(f"Error executing code: {exec_response.status_code}, {exec_response.text}")
                 return {"output": "Execution error", "memory": "", "cpuTime": ""}
@@ -186,21 +181,6 @@ class CodeEditorRoom(AsyncWebsocketConsumer):
         except requests.exceptions.RequestException as e:
             print(f"Request failed: {e}")
             return {"output": "Request error", "memory": "", "cpuTime": ""}
-
-    # async def save_output_to_redis(self, file_id, output_data):
-    #     """Saves the code output to Redis."""
-    #     redis_key = f"file_output_{file_id}"
-        
-    #     # Store the output data as a JSON string in Redis
-    #     cache.set(redis_key, json.dumps(output_data), timeout=3600)  # Set expiration time if necessary
-
-    # async def get_output_from_redis(self, file_id):
-    #     """Fetches the code output from Redis."""
-    #     redis_key = f"file_output_{file_id}"
-    #     output_data = cache.get(redis_key)
-    #     if output_data:
-    #         return json.loads(output_data)
-    #     return None
 
     @database_sync_to_async
     def get_file(self, file_id):
@@ -234,40 +214,76 @@ class CodeEditorRoom(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({"action": "user_list_update", "users": event["users"]}))
 
 
-
-    async def get_version_index(self,language):
-        latest_versions = {
-            "c": "5",
-            "cpp": "5",
-            "java": "5",
-            "python3": "4",
-            "php": "4",
-            "perl": "4",
-            "ruby": "4",
-            "go": "4",
-            "scala": "4",
-            "bash": "4",
-            "r": "4",
-            "swift": "4",
-            "objc": "4",
-            "mysql": "5",
-            "mssql": "4",
-            "plsql": "4",
-            "html": "4",
-            "csharp": "4",
-            "vb": "4",
-            "fsharp": "4",
-            "scheme": "4",
-            "nodejs": "4",
-            "prolog": "4",
-            "assembly": "4",
-            "clisp": "4",
-            "elixir": "4",
-            "erlang": "4",
-            "dart": "4",
-            "kotlin": "4",
-            "javascript": None,
-        }
-        
-        return latest_versions.get(language.lower(), "Unknown")
-
+    async def get_version(self,lang):
+        languages_dict = {
+        "matl": {"version": "22.7.4", "aliases": []},
+        "bash": {"version": "5.2.0", "aliases": ["sh"]},
+        "befunge93": {"version": "0.2.0", "aliases": ["b93"]},
+        "bqn": {"version": "1.0.0", "aliases": []},
+        "brachylog": {"version": "1.0.0", "aliases": []},
+        "brainfuck": {"version": "2.7.3", "aliases": ["bf"]},
+        "cjam": {"version": "0.6.5", "aliases": []},
+        "clojure": {"version": "1.10.3", "aliases": ["clojure", "clj"]},
+        "cobol": {"version": "3.1.2", "aliases": ["cob"]},
+        "coffeescript": {"version": "2.5.1", "aliases": ["coffeescript", "coffee"]},
+        "cow": {"version": "1.0.0", "aliases": ["cow"]},
+        "crystal": {"version": "0.36.1", "aliases": ["crystal", "cr"]},
+        "dart": {"version": "2.19.6", "aliases": []},
+        "dash": {"version": "0.5.11", "aliases": ["dash"]},
+        "typescript": {"version": "1.32.3", "aliases": ["deno", "deno-ts"], "runtime": "deno"},
+        "javascript": {"version": "1.32.3", "aliases": ["deno-js"], "runtime": "deno"},
+        "basic.net": {
+            "version": "5.0.201",
+            "aliases": ["basic", "visual-basic", "vb.net", "dotnet-basic"],
+            "runtime": "dotnet",
+        },
+        "fsharp.net": {
+            "version": "5.0.201",
+            "aliases": ["fsharp", "fs", "f#", "dotnet-fsharp"],
+            "runtime": "dotnet",
+        },
+        "csharp.net": {
+            "version": "5.0.201",
+            "aliases": ["csharp", "c#", "dotnet-csharp"],
+            "runtime": "dotnet",
+        },
+        "fsi": {
+            "version": "5.0.201",
+            "aliases": ["fsx", "fsharp-interactive"],
+            "runtime": "dotnet",
+        },
+        "dragon": {"version": "1.9.8", "aliases": []},
+        "elixir": {"version": "1.11.3", "aliases": ["elixir", "exs"]},
+        "emacs": {"version": "27.1.0", "aliases": ["el", "elisp"]},
+        "emojicode": {"version": "1.0.2", "aliases": ["emojic"]},
+        "erlang": {"version": "23.0.0", "aliases": ["erl", "escript"]},
+        "file": {"version": "0.0.1", "aliases": ["executable", "elf", "binary"]},
+        "forth": {"version": "0.7.3", "aliases": ["gforth"]},
+        "freebasic": {"version": "1.9.0", "aliases": ["qbasic", "quickbasic"]},
+        "awk": {"version": "5.1.0", "aliases": ["gawk"], "runtime": "gawk"},
+        "c": {"version": "10.2.0", "aliases": ["gcc"], "runtime": "gcc"},
+        "c++": {"version": "10.2.0", "aliases": ["cpp", "g++"], "runtime": "gcc"},
+        "d": {"version": "10.2.0", "aliases": ["gdc"], "runtime": "gcc"},
+        "go": {"version": "1.16.2", "aliases": ["go", "golang"]},
+        "java": {"version": "15.0.2", "aliases": []},
+        "julia": {"version": "1.8.5", "aliases": ["jl"]},
+        "kotlin": {"version": "1.8.20", "aliases": ["kt"]},
+        "lisp": {"version": "2.1.2", "aliases": ["cl", "sbcl", "commonlisp"]},
+        "lua": {"version": "5.4.4", "aliases": []},
+        "python2": {"version": "2.7.18", "aliases": ["py2"]},
+        "python": {"version": "3.10.0", "aliases": ["py", "python3", "python3.10"]},
+        "racket": {"version": "8.3.0", "aliases": ["rkt"]},
+        "ruby": {"version": "3.0.1", "aliases": ["rb"]},
+        "rust": {"version": "1.68.2", "aliases": ["rs"]},
+        "scala": {"version": "3.2.2", "aliases": ["sc"]},
+        "smalltalk": {"version": "3.2.3", "aliases": ["st"]},
+        "sqlite3": {"version": "3.36.0", "aliases": ["sqlite", "sql"]},
+        "swift": {"version": "5.3.3", "aliases": ["swift"]},
+        "typescript": {"version": "5.0.3", "aliases": ["ts", "node-ts"]},
+        "vlang": {"version": "0.3.3", "aliases": ["v"]},
+        "zig": {"version": "0.10.1", "aliases": []},
+    }
+        for key, value in languages_dict.items():
+            if lang == key or lang in value.get("aliases", []):
+                return value["version"]
+        return None

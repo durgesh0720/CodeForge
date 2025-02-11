@@ -1,12 +1,89 @@
-from django.shortcuts import render, redirect,HttpResponse
+from django.shortcuts import render, redirect,get_object_or_404
 from .models import  File,CurrentOutput
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-import os
 import requests
-import aiohttp
+
+languages_dict = {
+    "matl": {"version": "22.7.4", "aliases": []},
+    "bash": {"version": "5.2.0", "aliases": ["sh"]},
+    "befunge93": {"version": "0.2.0", "aliases": ["b93"]},
+    "bqn": {"version": "1.0.0", "aliases": []},
+    "brachylog": {"version": "1.0.0", "aliases": []},
+    "brainfuck": {"version": "2.7.3", "aliases": ["bf"]},
+    "cjam": {"version": "0.6.5", "aliases": []},
+    "clojure": {"version": "1.10.3", "aliases": ["clojure", "clj"]},
+    "cobol": {"version": "3.1.2", "aliases": ["cob"]},
+    "coffeescript": {"version": "2.5.1", "aliases": ["coffeescript", "coffee"]},
+    "cow": {"version": "1.0.0", "aliases": ["cow"]},
+    "crystal": {"version": "0.36.1", "aliases": ["crystal", "cr"]},
+    "dart": {"version": "2.19.6", "aliases": []},
+    "dash": {"version": "0.5.11", "aliases": ["dash"]},
+    "typescript": {"version": "1.32.3", "aliases": ["deno", "deno-ts"], "runtime": "deno"},
+    "javascript": {"version": "1.32.3", "aliases": ["deno-js"], "runtime": "deno"},
+    "basic.net": {
+        "version": "5.0.201",
+        "aliases": ["basic", "visual-basic", "vb.net", "dotnet-basic"],
+        "runtime": "dotnet",
+    },
+    "fsharp.net": {
+        "version": "5.0.201",
+        "aliases": ["fsharp", "fs", "f#", "dotnet-fsharp"],
+        "runtime": "dotnet",
+    },
+    "csharp.net": {
+        "version": "5.0.201",
+        "aliases": ["csharp", "c#", "dotnet-csharp"],
+        "runtime": "dotnet",
+    },
+    "fsi": {
+        "version": "5.0.201",
+        "aliases": ["fsx", "fsharp-interactive"],
+        "runtime": "dotnet",
+    },
+    "dragon": {"version": "1.9.8", "aliases": []},
+    "elixir": {"version": "1.11.3", "aliases": ["elixir", "exs"]},
+    "emacs": {"version": "27.1.0", "aliases": ["el", "elisp"]},
+    "emojicode": {"version": "1.0.2", "aliases": ["emojic"]},
+    "erlang": {"version": "23.0.0", "aliases": ["erl", "escript"]},
+    "file": {"version": "0.0.1", "aliases": ["executable", "elf", "binary"]},
+    "forth": {"version": "0.7.3", "aliases": ["gforth"]},
+    "freebasic": {"version": "1.9.0", "aliases": ["qbasic", "quickbasic"]},
+    "awk": {"version": "5.1.0", "aliases": ["gawk"], "runtime": "gawk"},
+    "c": {"version": "10.2.0", "aliases": ["gcc"], "runtime": "gcc"},
+    "c++": {"version": "10.2.0", "aliases": ["cpp", "g++"], "runtime": "gcc"},
+    "d": {"version": "10.2.0", "aliases": ["gdc"], "runtime": "gcc"},
+    "go": {"version": "1.16.2", "aliases": ["go", "golang"]},
+    "java": {"version": "15.0.2", "aliases": []},
+    "julia": {"version": "1.8.5", "aliases": ["jl"]},
+    "kotlin": {"version": "1.8.20", "aliases": ["kt"]},
+    "lisp": {"version": "2.1.2", "aliases": ["cl", "sbcl", "commonlisp"]},
+    "lua": {"version": "5.4.4", "aliases": []},
+    "python2": {"version": "2.7.18", "aliases": ["py2"]},
+    "python": {"version": "3.10.0", "aliases": ["py", "python3", "python3.10"]},
+    "racket": {"version": "8.3.0", "aliases": ["rkt"]},
+    "ruby": {"version": "3.0.1", "aliases": ["rb"]},
+    "rust": {"version": "1.68.2", "aliases": ["rs"]},
+    "scala": {"version": "3.2.2", "aliases": ["sc"]},
+    "smalltalk": {"version": "3.2.3", "aliases": ["st"]},
+    "sqlite3": {"version": "3.36.0", "aliases": ["sqlite", "sql"]},
+    "swift": {"version": "5.3.3", "aliases": ["swift"]},
+    "typescript": {"version": "5.0.3", "aliases": ["ts", "node-ts"]},
+    "vlang": {"version": "0.3.3", "aliases": ["v"]},
+    "zig": {"version": "0.10.1", "aliases": []},
+    }
+
+def get_version(lang):
+    for key, value in languages_dict.items():
+        if lang == key or lang in value.get("aliases", []):
+            return value["version"]
+    return 
+def getLanuages():
+    return languages_dict
+
+    
 
 @login_required
 def dashboard(request):
@@ -50,12 +127,14 @@ def project_editor(request,file_id):
         file_output = CurrentOutput.objects.get(file=file)
     except Exception as e:
         context={
-            'file_output':e
+            'file_output':e,
+            'languages':getLanuages()
         }
     context = {
         'file': file,
         'id': file_id,
-        'file_output':file_output
+        'file_output':file_output,
+        'languages':getLanuages()
     }
     return render(request, 'editor.html', context)
 
@@ -120,105 +199,63 @@ def delete_file(request, file_id):
             return JsonResponse({"error": "File not found"}, status=404)
     return JsonResponse({"error": "Invalid request"}, status=400)
 
-@login_required
+@csrf_exempt
 def execute_code(request):
     if request.method == 'POST':
-        context = {}
-        file_id = request.POST.get('file_id')
-        script = request.POST.get('content')
-        language = request.POST.get('language')
+        try:
+            # Parse request body
+            data = json.loads(request.body)
+            file_id = data.get('file_id')
+            script = data.get('content')
+            language = data.get('language')
+            # Fetch file object
+            file_obj = get_object_or_404(File, id=file_id)
+            file_obj.content = script
+            file_obj.extension = language
+            file_obj.save()
 
-        file_obj = File.objects.get(id=file_id)
+            exec_url = "https://emkc.org/api/v2/piston/execute"
+            # Prepare execution request
+            exec_data = {
+                "language":language,
+                "version":get_version(language),
+                "files":[{"name":"main","content":script}],
+                "stdin":"",
+            }
 
-        file_obj.content=script
-        file_obj.extension = language
-        print(f'Execute: ',script)
-        file_obj.save()
+            # Send execution request
+            headers = {"Content-Type": "application/json"}
+            exec_response = requests.post(exec_url, json=exec_data, headers=headers)
+            
+            if exec_response.status_code == 200:
+                result = exec_response.json()
 
-        auth_url = "https://api.jdoodle.com/v1/auth-token"
-        exec_url = "https://api.jdoodle.com/v1/execute"
-        version_index = "2"
-        client_id = "79f69246d6fd2665bb3df2f217e57383"
-        client_secret = "a5e6d402d2be3923b35dabb61505b71b06157834cad62c58346cec6510814c55"
+                # Save output in CurrentOutput model
+                output, created = CurrentOutput.objects.update_or_create(
+                    file=file_obj,
+                    defaults={
+                        "output": result.get("run", {}).get("stdout", ""),
+                        "memory": result.get("run", {}).get("memory", ""),
+                        "cpuTime": result.get("run", {}).get("time", ""),
+                    }
+                )
+            
+                return JsonResponse({
+                    "message": "Program executed successfully",
+                    "output": result.get("run", {}).get("stdout", ""),
+                    "memory": result.get("run", {}).get("memory", ""),
+                    "cpuTime": result.get("run", {}).get("time", ""),
+                    "error": result.get("run", {}).get("stderr", ""),
+                    "exit_code": result.get("run", {}).get("code", ""),
+                }, status=200)
+            else:
+                return JsonResponse({"error": "Error executing code"}, status=500)
 
-        auth_data = {
-            "clientId": client_id,
-            "clientSecret": client_secret,
-        }
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+        except File.DoesNotExist:
+            return JsonResponse({"error": "File not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": f"Unexpected error: {str(e)}"}, status=500)
 
-        # Fetch auth token
-        auth_response = requests.post(auth_url, json=auth_data)
-        if auth_response.status_code == 200:
-            try:
-                auth_token = auth_response.text
-                
-                exec_data = {
-                    "script": script,
-                    "stdin": "",
-                    "language": language,
-                    "versionIndex": version_index,
-                    "clientId": client_id,
-                    "clientSecret": client_secret,
-                    "token": auth_token
-                }
-
-                # Execute code
-                exec_response = requests.post(exec_url, json=exec_data)
-                if exec_response.status_code == 200:
-                    result = exec_response.json()
-                    context['output'] = f" {result.get('output')} "
-                    context['Memory'] = f"Memory: {result.get('memory')}"
-                    context['cpuTime'] = f"cpuTime: {result.get('cpuTime')}"
-                    # Fetch and save the file object
-                    try:
-                        program_output = CurrentOutput.objects.get(file=file_obj)
-                        program_output.output = context['output']
-                        program_output.memory = context['Memory']
-                        program_output.cpuTime = context['cpuTime']
-                        program_output.save()
-                        file_obj.save()
-                    except:
-                        output = CurrentOutput.objects.create(
-                            file = file_obj,
-                            output = context['output'],
-                            memory = context['Memory'],
-                            cpuTime = context['cpuTime']
-                        ) 
-                        output.save()
-                        file_obj.save()
-                    return redirect(f'/projecteditor/{file_id}')
-                else:
-                    context['output'] = "Error executing code"
-                    return redirect(f'/projecteditor/{file_id}')
-
-            except ValueError:
-                context['output'] = "Error parsing response"
-        else:
-            context['output'] = "Error fetching auth token"
-        return redirect(f'/projecteditor/{file_id}')
-    
-# @login_required
-# def create_room(request):
-#     if request.method == "POST":
-#         room_id = request.POST.get('room_id')
-#         file_id = request.POST.get('file_id')
-#         file_obj = File.objects.get(id=file_id)
-#         print(f"Creating Room: {file_id} {room_id}")
-#         if file_obj is None:
-#             return redirect('dashboard')
-#         file_output = CurrentOutput.objects.get(file = file_obj)
-#         context = {
-#             'room_id':room_id,
-#             'file':file_obj,
-#             'file_output':file_output
-#         }
-#         print(f"Context: {context}")
-#         return render(request,'Room_Editor_Page.html',context)
-
-# @login_required
-# def join_room(request):
-#     if request.method == "POST":
-#         room_id = request.POST.get('room_id') 
-#         return render(request,'Room_Editor_Page.html',{'room_id':room_id})
-
-
+    return JsonResponse({"error": "Invalid request method"}, status=405)
