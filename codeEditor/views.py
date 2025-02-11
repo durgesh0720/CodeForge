@@ -169,10 +169,10 @@ def update_file(request):
 @login_required
 def rename_file(request):
     context={}
-    if request.method == "POST":
+    if request.method == "PUT":
         try:
             data = json.loads(request.body)
-            filename = data.get("new_filename")
+            filename = data.get("filename")
             file_id = data.get("file_id")
             file = File.objects.get(id=file_id)
             file.file_name = filename

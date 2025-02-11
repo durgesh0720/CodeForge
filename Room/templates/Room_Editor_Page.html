@@ -600,6 +600,7 @@ body {
                 messageElement.innerHTML = `@${data.username}: <br>${data.message}`;
                 messageElement.classList.add("chat-message");
                 document.getElementById("chatMessages").appendChild(messageElement);
+                messageElement.scrollHeight;
             }
             if (data.action === "user_list_update") {
                 const userList = document.getElementById("userList");

@@ -151,7 +151,7 @@
                 <!-- Three dot menu  -->
                 <div id="threedotMenu" class="dropdown-menu hidden absolute right-0 mt-2 bg-white dark:bg-gray-800 shadow-xl rounded-lg border-2 border-indigo-500 transition-all duration-300 transform scale-95 hover:scale-100">
                     <ul class="text-gray-900 dark:text-white">
-                        <li class="px-4 py-3 cursor-pointer rounded-lg flex items-center space-x-2 hover:bg-indigo-100 dark:hover:bg-indigo-700 transition-all duration-200">
+                        <li class="px-4 py-3 cursor-pointer rounded-lg flex items-center space-x-2 hover:bg-indigo-100 dark:hover:bg-indigo-700 transition-all duration-200" onclick="showRename('{{ file.id }}')">
                             <i class="fa-solid fa-pen-to-square" style="color: #2563eb;"></i>
                             <span>Rename</span>
                         </li>
@@ -279,6 +279,21 @@
             </div>
         </div>
     </div>
+    <!-- Rename File Modal -->
+    <div id="renameForm" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-1/3">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Rename File</h2>
+            
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">New File Name</label>
+            <input type="text" id="filename" name="file_name" required
+                class="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+
+            <div class="mt-4 flex justify-around">
+                <button id="confirmYes1" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Yes, Rename</button>
+                <button id="confirmNo1" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Open the "Create New File" modal
@@ -339,12 +354,12 @@
             }
         }
 
-        // Close the dropdown if clicked outside
+      // Close the dropdown if clicked outside
         document.addEventListener('click', function(event) {
             const dropdown = document.querySelector('.dropdown-menu');
             if (dropdown && !event.target.closest('.relative') && !dropdown.contains(event.target)) {
                 dropdown.classList.add('hidden');
-            }
+            }   
         });
 
         function showCustomAlert(msg) {
@@ -367,35 +382,35 @@
                 }
             }, 200); // Update every 200ms to create the progress effect
         }
-                function showConfirmModal(file_id) {
-                    const confirmModal = document.getElementById('confirmModal');
-                    const confirmYesButton = document.getElementById('confirmYes');
-                    const confirmNoButton = document.getElementById('confirmNo');
+        function showConfirmModal(file_id) {
+            const confirmModal = document.getElementById('confirmModal');
+            const confirmYesButton = document.getElementById('confirmYes');
+            const confirmNoButton = document.getElementById('confirmNo');
 
-                    // Show the modal
-                    confirmModal.style.display = 'flex';
+            // Show the modal
+            confirmModal.style.display = 'flex';
 
-                    // Handle "Yes" button click
-                    confirmYesButton.onclick = async function() {
-                        confirmYesButton.disabled = true;  // Disable to prevent multiple clicks
-                        confirmYesButton.innerText = "Processing...";
-                        try {
-                            await deleteFile(file_id);
-                            confirmModal.style.display = 'none'; // Close the modal
-                        } catch (error) {
-                            console.error('Error during deletion:', error);
-                        } finally {
-                            // Re-enable button in case of failure
-                            confirmYesButton.disabled = false;
-                            confirmYesButton.innerText = "Yes";
-                        }
-                    };
-
-                    // Handle "No" button click
-                    confirmNoButton.onclick = function() {
-                        confirmModal.style.display = 'none'; // Just close the modal if canceled
-                    };
+            // Handle "Yes" button click
+            confirmYesButton.onclick = async function() {
+                confirmYesButton.disabled = true;  // Disable to prevent multiple clicks
+                confirmYesButton.innerText = "Processing...";
+                try {
+                    await deleteFile(file_id);
+                    confirmModal.style.display = 'none'; // Close the modal
+                } catch (error) {
+                    console.error('Error during deletion:', error);
+                } finally {
+                    // Re-enable button in case of failure
+                    confirmYesButton.disabled = false;
+                    confirmYesButton.innerText = "Yes";
                 }
+            };
+
+            // Handle "No" button click
+            confirmNoButton.onclick = function() {
+                confirmModal.style.display = 'none'; // Just close the modal if canceled
+            };
+        }
 
         async function deleteFile(file_id) {
             try {
@@ -424,7 +439,63 @@
         dropdown.classList.toggle('hidden');
         });
 
+function showRename(file_id) {
+    const renameForm = document.getElementById("renameForm");
+    const confirmYesButton = document.getElementById("confirmYes1");
+    const confirmNoButton = document.getElementById("confirmNo1");
 
+    renameForm.style.display = "flex";
+
+    // Handle "Yes, Rename" button click
+    confirmYesButton.onclick = async function () {
+        const newFileName = document.getElementById("filename").value.trim();
+            if (newFileName === "") {
+                alert("File name cannot be empty!");
+                return;
+            }
+
+            try {
+                confirmYesButton.disabled = true;
+                confirmYesButton.innerText = "Renaming...";
+
+                await renameFile(file_id, newFileName);
+                renameForm.style.display = "none"; // Hide modal after rename
+            } catch (error) {
+                console.error("Error renaming file:", error);
+            } finally {
+                confirmYesButton.disabled = false;
+                confirmYesButton.innerText = "Yes, Rename";
+            }
+    };
+    async function renameFile(file_id, newFileName) {
+        try {
+            const response = await fetch(`/rename-file/`, {
+                method: "PUT",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ file_id: file_id, filename: newFileName }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: Failed to rename file`);
+            }
+
+            const data = await response.json();
+            showCustomAlert(data.message || "File renamed successfully" )
+        } catch (error) {
+            console.error("Error:", error);
+            alert("There was an error renaming the file.");
+        }
+    }
+    // Handle "Cancel" button click
+    confirmNoButton.onclick = function () {
+        renameForm.style.display = "none";
+    };
+
+}
+  
     </script>
     
 </body>
