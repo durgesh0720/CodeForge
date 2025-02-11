@@ -377,11 +377,17 @@
 
                     // Handle "Yes" button click
                     confirmYesButton.onclick = async function() {
+                        confirmYesButton.disabled = true;  // Disable to prevent multiple clicks
+                        confirmYesButton.innerText = "Processing...";
                         try {
                             await deleteFile(file_id);
                             confirmModal.style.display = 'none'; // Close the modal
                         } catch (error) {
                             console.error('Error during deletion:', error);
+                        } finally {
+                            // Re-enable button in case of failure
+                            confirmYesButton.disabled = false;
+                            confirmYesButton.innerText = "Yes";
                         }
                     };
 
