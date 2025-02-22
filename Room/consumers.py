@@ -76,7 +76,7 @@ class CodeEditorRoom(AsyncWebsocketConsumer):
         if action == "run_code":
             file_id = data.get('file_id')
             script = data.get('content')
-            language = data.get('language')
+            language = f"{data.get('language')}".lower()
             versionIndex = data.get("versionIndex")
 
             file_obj = await self.get_file(file_id)
@@ -85,7 +85,7 @@ class CodeEditorRoom(AsyncWebsocketConsumer):
 
             # Save file content and language properly
             file_obj.content = script
-            file_obj.extension = language  # Correct field name
+            file_obj.extension = f"{language}".lower()  # Correct field name
             await self.save_file(file_obj)  # Ensure file is saved
 
             # Execute code
