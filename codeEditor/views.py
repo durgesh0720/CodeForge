@@ -199,7 +199,7 @@ def delete_file(request, file_id):
             return JsonResponse({"error": "File not found"}, status=404)
     return JsonResponse({"error": "Invalid request"}, status=400)
 
-@csrf_exempt
+
 def execute_code(request):
     if request.method == 'POST':
         try:
@@ -208,7 +208,7 @@ def execute_code(request):
             data = json.loads(request.body)
             file_id = data.get('file_id')
             script = data.get('content')
-            language = data.get('language')
+            language = f"{data.get('language', '')}".lower()
             # Fetch file object
             file_obj = get_object_or_404(File, id=file_id)
             file_obj.content = script

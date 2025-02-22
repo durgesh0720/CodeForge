@@ -388,7 +388,8 @@ function enableIntelliSense() {
                 "language": extension,  // ✅ Fixed spelling
             };
             try {
-                const response = await fetch(`/execute-code/`, { // Use correct endpoint
+                const url = "{% url 'executeCode' %}"
+                const response = await fetch(url, { // Use correct endpoint
                     method: "POST",
                     headers: {
                         "X-CSRFToken": "{{ csrf_token }}",  // Ensure CSRF token is properly included
@@ -411,10 +412,11 @@ function enableIntelliSense() {
                     <p>error: ${result.error}</p>
                     <p>exit_code: ${result.exit_code}</p>
                     `;
-                    showCustomAlert(result.message);
+                    print(result.message)
+                    // showCustomAlert(result.message);
             } catch (error) {
                 console.error("Error running:", error);
-                showCustomAlert("There was an error runing the file.");
+                // showCustomAlert("There was an error runing the file.");
             }
         }
     </script>
