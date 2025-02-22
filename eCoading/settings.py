@@ -15,10 +15,11 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["codeforge-28dy.onrender.com","*"]
+ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://codeforge-28dy.onrender.com",
+    "http://127.0.0.1:8000"
 ]
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
@@ -80,6 +81,7 @@ DATABASES = {
     )
 }
 
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -107,3 +109,14 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
 }
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': 'redis://codeforge-kbtytu.serverless.aps1.cache.amazonaws.com:6379/0',  # Replace with your ElastiCache endpoint
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#             'SSL': True,  # Set to True if ElastiCache uses encryption
+#         },
+#     }
+# }

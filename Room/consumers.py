@@ -11,14 +11,10 @@ load_dotenv()
 
 ROOM_USERS={}
 
-
-
 class CodeEditorRoom(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.buffer = {}  # In-memory buffer for code execution results, can be replaced by Redis
-        self.JD_CLIENT_ID = os.getenv("JD_CLIENT_ID")
-        self.JD_CLIENT_SECRET = os.getenv("JD_CLIENT_SECRET")
 
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']  # Get the room ID

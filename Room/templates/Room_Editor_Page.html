@@ -553,6 +553,7 @@ body {
 
     // Establish WebSocket connection.
     const chatSocket = new WebSocket(`wss://codeforge-28dy.onrender.com/ws/chat/${room_id}/`);
+    // const chatSocket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${room_id}/`);
     
     function debounce(func, timeout = 500) {
         let timer;
@@ -596,11 +597,12 @@ body {
                 terminal.scrollTop = terminal.scrollHeight;
             }
             if (data.action === 'message') {
+                const chatMessages = document.getElementById("chatMessages");
                 const messageElement = document.createElement("div");
                 messageElement.innerHTML = `@${data.username}: <br>${data.message}`;
                 messageElement.classList.add("chat-message");
                 document.getElementById("chatMessages").appendChild(messageElement);
-                messageElement.scrollHeight;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
             if (data.action === "user_list_update") {
                 const userList = document.getElementById("userList");
@@ -618,7 +620,6 @@ body {
         };
     chatSocket.onclose = function () {
             console.log("WebSocket connection closed.");
-            chatSocket = new WebSocket(`wss://codeforge-28dy.onrender.com/ws/chat/${room_id}/`);
     };
     
     // Chat message sending.

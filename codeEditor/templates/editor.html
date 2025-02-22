@@ -388,7 +388,7 @@ function enableIntelliSense() {
                 "language": extension,  // ✅ Fixed spelling
             };
             try {
-                const response = await fetch(`https://codeforge-28dy.onrender.com/execute-code/`, { // Use correct endpoint
+                const response = await fetch(`/execute-code/`, { // Use correct endpoint
                     method: "POST",
                     headers: {
                         "X-CSRFToken": "{{ csrf_token }}",  // Ensure CSRF token is properly included

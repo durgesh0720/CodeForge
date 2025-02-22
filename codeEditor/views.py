@@ -204,6 +204,7 @@ def execute_code(request):
     if request.method == 'POST':
         try:
             # Parse request body
+            print("Reauest Come for run code")
             data = json.loads(request.body)
             file_id = data.get('file_id')
             script = data.get('content')
@@ -239,7 +240,7 @@ def execute_code(request):
                         "cpuTime": result.get("run", {}).get("time", ""),
                     }
                 )
-            
+
                 return JsonResponse({
                     "message": "Program executed successfully",
                     "output": result.get("run", {}).get("stdout", ""),

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from .models import coder
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
-
+from django.contrib.auth.models import User
 
 
 # Create your views here.
@@ -44,6 +44,8 @@ def signupCoder(request):
         if password != confirm_password:
             context = {'error': "Password not matched"}
             return render(request, "authe.html", context)
+        
+
         try:
             user = User.objects.create_user(
                 username=username,
